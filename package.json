@@ -1,0 +1,22 @@
+{
+  "name": "hectic-downloader-bot",
+  "version": "1.0.0",
+  "description": "YouTube Downloader Bot for Telegram with search functionality",
+  "main": "subzero.js",
+  "scripts": {
+    "start": "node subzero.js",
+    "dev": "nodemon subzero.js"
+  },
+  "keywords": ["telegram", "bot", "youtube", "downloader"],
+  "author": "Darrell Mucheri (Mr Frank)",
+  "license": "MIT",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.64.0",
+    "axios": "^1.6.2",
+    "youtube-search-api": "^1.2.1",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
