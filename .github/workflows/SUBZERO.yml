@@ -1,4 +1,4 @@
-name: SUBZERO-MD-X-MR-FRANK
+name: SUBZERO-MD-X-MR-FRAN
 
 on:
   workflow_dispatch:
