@@ -2,7 +2,7 @@ require('dotenv').config();
 
 module.exports = {
   // Bot Configuration
-  BOT_TOKEN: process.env.BOT_TOKEN || '8579217430:AAEcglCDYIrH9nqb-aBuz5A9Q_HjuXKAGUQ',
+  BOT_TOKEN: process.env.BOT_TOKEN || 'your_telegram_bot_token_here',
   
   // API Configuration
   API_URL: 'https://yt-dl.officialhectormanuel.workers.dev/',
@@ -11,7 +11,7 @@ module.exports = {
   CREATOR: 'Darrell Mucheri (Mr Frank)',
   BOT_NAME: '𝙃𝙚𝙘𝙩𝙞𝙘 𝘿𝙤𝙬𝙣𝙡𝙤𝙖𝙙𝙚𝙧 𝘽𝙮 𝙈𝙧 𝙁𝙧𝙖𝙣𝙠',
   
-  // Developer Info
+  // Developer Info, I intentionally made these variable to see who dares to change. At least give credits to Me ( Mr Frank )
   DEVELOPER: {
     name: 'Mr Frank',
     telegram: 't.me/mrfrankofc',
@@ -24,15 +24,15 @@ module.exports = {
   
   // Features
   AUTO_DELETE_TIMEOUT: 60000, // 60 seconds
-  SEARCH_RESULTS_LIMIT: 10,
+  SEARCH_RESULTS_LIMIT: 12,
   
   // Loading Animation
   LOADING_FRAMES: ['⏳', '⌛', '⏳', '⌛'],
   
   // Messages
-  WELCOME_MESSAGE: `╔═══════════════════════╗
-║  🎬 𝙃𝙚𝙘𝙩𝙞𝙘 𝘿𝙤𝙬𝙣𝙡𝙤𝙖𝙙𝙚𝙧 🎬  ║
-╚═══════════════════════╝
+  WELCOME_MESSAGE: `╭════════════════⟢
+│  🎬 𝙃𝙚𝙘𝙩𝙞𝙘 𝘿𝙤𝙬𝙣𝙡𝙤𝙖𝙙𝙚𝙧 🎬  
+╰════════════════⟢
 
 🌟 *Welcome to the Ultimate YouTube Downloader!*
 
@@ -59,13 +59,13 @@ module.exports = {
 /users - User statistics
 /system - System information
 
-👨‍💻 *Created by:* 𝙈𝙧 𝙁𝙧𝙖𝙣𝙠
+\`\`\`𝘾𝙧𝙚𝙖𝙩𝙚𝙙 𝘽𝙮 𝙈𝙧 𝙁𝙧𝙖𝙣𝙠\`\`\`
 
 Send me a YouTube link or search query to get started! 🚀`,
 
-  HELP_MESSAGE: `╔═══════════════════════╗
-║    📖 𝙃𝙚𝙡𝙥 𝙈𝙚𝙣𝙪    ║
-╚═══════════════════════╝
+  HELP_MESSAGE: `╔═══════════════
+║    📖 𝙃𝙚𝙡𝙥 𝙈𝙚𝙣𝙪    
+╚════════════════════
 
 *Available Commands:*
 ━━━━━━━━━━━━━━━━━━━━
