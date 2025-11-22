@@ -136,6 +136,46 @@ const scheduleDelete = async (chatId, messageIds, timeout = config.AUTO_DELETE_T
   }, timeout);
 };
 
+// Download and send media directly to Telegram
+const sendMediaToTelegram = async (chatId, downloadUrl, type, quality, videoData) => {
+  const uploadMsg = await bot.sendMessage(chatId, '⬆️ Uploading to Telegram...');
+  
+  try {
+    const response = await axios.get(downloadUrl, {
+      responseType: 'stream',
+      timeout: 120000
+    });
+    
+    const caption = `📹 *${videoData.title}*\n\n👨‍💻 *${config.BOT_NAME}*`;
+    
+    if (type === 'audio') {
+      await bot.sendAudio(chatId, response.data, {
+        caption,
+        parse_mode: 'Markdown',
+        title: videoData.title,
+        performer: config.BOT_NAME
+      });
+    } else {
+      await bot.sendVideo(chatId, response.data, {
+        caption,
+        parse_mode: 'Markdown',
+        supports_streaming: true
+      });
+    }
+    
+    await bot.deleteMessage(chatId, uploadMsg.message_id);
+    return true;
+  } catch (error) {
+    console.error('Error uploading to Telegram:', error.message);
+    await bot.editMessageText(
+      '❌ File too large for Telegram or upload failed. Use download link instead.',
+      { chat_id: chatId, message_id: uploadMsg.message_id }
+    );
+    setTimeout(() => bot.deleteMessage(chatId, uploadMsg.message_id).catch(() => {}), 5000);
+    return false;
+  }
+};
+
 // Command Handlers
 bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
@@ -281,21 +321,31 @@ const processSearch = async (chatId, query, originalMsgId) => {
   // Delete loading message
   await bot.deleteMessage(chatId, loadingMsg.message_id);
   
-  // Format search results
-  let resultText = `🔍 *Search Results for:* "${query}"\n\n`;
-  resultText += `Found ${results.length} results. Reply with a number (1-${results.length}) to select:\n\n`;
+  // Format search results with improved design
+  let resultText = `🔍 *Search Results*\n`;
+  resultText += `━━━━━━━━━━━━━━━━━━━\n`;
+  resultText += `Query: _"${query}"_\n`;
+  resultText += `Found: ${results.length} video${results.length > 1 ? 's' : ''}\n\n`;
   
   results.forEach((video, index) => {
-    const duration = video.length ? video.length.simpleText : 'N/A';
-    const views = video.viewCount ? video.viewCount.text : 'N/A';
+    const duration = video.length?.simpleText || '⏱️ Live';
+    const views = video.viewCount?.text || '';
     const channel = video.channelTitle || 'Unknown';
     
-    resultText += `*${index + 1}.* ${video.title}\n`;
-    resultText += `   👤 ${channel}\n`;
-    resultText += `   ⏱️ ${duration} | 👁️ ${views}\n\n`;
+    resultText += `*${index + 1}.*  ${video.title}\n`;
+    resultText += `    👤 ${channel}\n`;
+    if (duration !== '⏱️ Live') {
+      resultText += `    ⏱️ ${duration}`;
+      if (views) resultText += ` • 👁️ ${views}`;
+      resultText += `\n`;
+    } else {
+      resultText += `    🔴 Live Stream\n`;
+    }
+    resultText += `\n`;
   });
   
-  resultText += `_Reply with the number of your choice (e.g., "3")_\n\n`;
+  resultText += `━━━━━━━━━━━━━━━━━━━\n`;
+  resultText += `💬 Reply with number (1-${results.length})\n\n`;
   resultText += `👨‍💻 *${config.BOT_NAME}*`;
   
   const searchMsg = await bot.sendMessage(chatId, resultText, {
@@ -371,61 +421,34 @@ bot.on('callback_query', async (query) => {
     return;
   }
   
-  let downloadUrl, qualityText;
+  let downloadUrl, qualityText, type;
   if (downloadType === 'audio') {
     downloadUrl = videoData.audio;
     qualityText = 'Audio (MP3)';
+    type = 'audio';
   } else {
     const quality = parts[1];
     downloadUrl = videoData.videos[quality];
     qualityText = `Video (${quality}p)`;
+    type = 'video';
   }
   
-  // Update message with download link
-  const downloadText = `✅ *Ready to Download!*
-
-📦 *Format:* ${qualityText}
-
-Click the button below to download:
-
-_This message will auto-delete in 60 seconds_
-
-👨‍💻 *${config.BOT_NAME}*`;
-  
-  const keyboard = {
-    inline_keyboard: [
-      [{ text: '📥 Download Now', url: downloadUrl }],
-      [{ text: '✅ Done', callback_data: 'done' }]
-    ]
-  };
-  
+  // Delete the selection message
   try {
-    if (query.message.photo) {
-      await bot.editMessageCaption(downloadText, {
-        chat_id: chatId,
-        message_id: query.message.message_id,
-        parse_mode: 'Markdown',
-        reply_markup: keyboard
-      });
-    } else {
-      await bot.editMessageText(downloadText, {
-        chat_id: chatId,
-        message_id: query.message.message_id,
-        parse_mode: 'Markdown',
-        reply_markup: keyboard
-      });
-    }
+    await bot.deleteMessage(chatId, query.message.message_id);
   } catch (error) {
-    console.error('Error editing message:', error.message);
+    console.error('Error deleting message:', error.message);
   }
   
-  // Auto-delete after 60 seconds
+  // Send media directly to Telegram
+  const success = await sendMediaToTelegram(chatId, downloadUrl, type, qualityText, videoData);
+  
+  // Clean up original messages
   const userState = userStates.get(chatId);
   if (userState && userState.messagesToDelete) {
-    scheduleDelete(chatId, [...userState.messagesToDelete, query.message.message_id]);
-  } else {
-    scheduleDelete(chatId, [query.message.message_id]);
+    scheduleDelete(chatId, userState.messagesToDelete, 5000);
   }
+  userStates.delete(chatId);
   } catch (error) {
     console.error('Error in callback query handler:', error);
     await bot.answerCallbackQuery(query.id, {
