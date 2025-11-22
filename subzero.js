@@ -1,3 +1,9 @@
+/*
+"Fear those who dont give credits", Mr Frank
+Released : Sat 22 Nov 2025
+
+*/
+
 const TelegramBot = require('node-telegram-bot-api');
 const axios = require('axios');
 const YoutubeSearch = require('youtube-search-api');
